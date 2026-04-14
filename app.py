@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 SOURCE_URL = "https://raw.githubusercontent.com/Shihaix/Pluto-TV-Playlists/main/output/plutotv_us.m3u8"
 
-KEYWORDS = ["Kids"]
+KEYWORDS = ["Pokémon"]
 
 @app.route("/")
 def kids_playlist():
