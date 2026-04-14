@@ -15,7 +15,11 @@ def kids_playlist():
 
     for i in range(len(text)):
         line = text[i]
-        if line.startswith("#EXTINF") and any(k in line.lower() for k in KEYWORDS):
+        if line.startswith("#EXTINF") and (
+    'group-title="Kids"' in line or
+    'cartoon' in line.lower() or
+    'anime' in line.lower()
+):
             output.append(line)
             if i + 1 < len(text):
                 output.append(text[i+1])
