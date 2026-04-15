@@ -5,20 +5,25 @@ app = Flask(__name__)
 
 SOURCE_URL = "https://raw.githubusercontent.com/Shihaix/Pluto-TV-Playlists/main/output/plutotv_us.m3u8"
 
-KEYWORDS = ["Pokémon"]
-
 @app.route("/")
-def kids_playlist():
-    text = requests.get(SOURCE_URL).text.splitlines()
+def playlist():
+    try:
+        res = requests.get(SOURCE_URL)
+        res.raise_for_status()
+        lines = res.text.splitlines()
 
-    output = ["#EXTM3U"]
+        output = ["#EXTM3U"]
 
-    for i in range(len(text)):
-        line = text[i]
-        if line.startswith("#EXTINF") and (
-    'Pokémon"' in line):
-            output.append(line)
-            if i + 1 < len(text):
-                output.append(text[i+1])
+        for i in range(len(lines)):
+            line = lines[i]
 
-    return Response("\n".join(output), mimetype="text/plain")
+            # ✅ TEMP: NO FILTER (debug mode)
+            if line.startswith("#EXTINF"):
+                output.append(line)
+                if i + 1 < len(lines):
+                    output.append(lines[i+1])
+
+        return Response("\n".join(output), mimetype="text/plain")
+
+    except Exception as e:
+        return f"ERROR: {str(e)}"
