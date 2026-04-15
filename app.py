@@ -1,11 +1,3 @@
-from flask import Flask, Response
-import requests
-
-app = Flask(__name__)
-
-SOURCE_URL = "https://raw.githubusercontent.com/Shihaix/Pluto-TV-Playlists/main/output/plutotv_us.m3u8"
-CHANNEL_ID = "6675c7868768aa0008d7f1c7"
-
 @app.route("/")
 def stream_only():
     try:
@@ -14,11 +6,14 @@ def stream_only():
         lines = res.text.splitlines()
 
         for i in range(len(lines)):
-            line = lines[i]
+            if lines[i].startswith("#EXTINF") and CHANNEL_ID in lines[i]:
+                stream_url = lines[i+1]
 
-            if line.startswith("#EXTINF") and CHANNEL_ID in line:
-                if i + 1 < len(lines):
-                    return Response(lines[i+1], mimetype="text/plain")
+                stream = requests.get(stream_url, stream=True)
+                return Response(
+                    stream.iter_content(chunk_size=1024),
+                    content_type=stream.headers.get("Content-Type", "application/vnd.apple.mpegurl")
+                )
 
         return "Channel not found"
 
