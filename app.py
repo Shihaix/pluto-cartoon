@@ -1,21 +1,27 @@
-@app.route("/")
-def stream_only():
-    try:
-        res = requests.get(SOURCE_URL, timeout=10)
-        res.raise_for_status()
-        lines = res.text.splitlines()
+@app.route("/Pokémon")
+def spotlight():
+    CHANNEL_ID = "6675c7868768aa0008d7f1c7"
 
-        for i in range(len(lines)):
-            if lines[i].startswith("#EXTINF") and CHANNEL_ID in lines[i]:
-                stream_url = lines[i+1]
+    r = requests.get(SOURCE_URL, timeout=15)
+    lines = r.text.splitlines()
 
-                stream = requests.get(stream_url, stream=True)
-                return Response(
-                    stream.iter_content(chunk_size=1024),
-                    content_type=stream.headers.get("Content-Type", "application/vnd.apple.mpegurl")
-                )
+    for i in range(len(lines)):
+        if CHANNEL_ID in lines[i]:
+            stream_url = lines[i + 1]
 
-        return "Channel not found"
+            stream = requests.get(
+                stream_url,
+                stream=True,
+                headers={"User-Agent": "Mozilla/5.0"}
+            )
 
-    except Exception as e:
-        return f"Error: {str(e)}"
+            return Response(
+                stream.iter_content(chunk_size=8192),
+                content_type=stream.headers.get(
+                    "Content-Type",
+                    "application/vnd.apple.mpegurl"
+                ),
+                direct_passthrough=True
+            )
+
+    return "Channel not found", 404
